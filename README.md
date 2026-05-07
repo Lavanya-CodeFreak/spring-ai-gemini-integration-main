@@ -1,84 +1,139 @@
-# -> Spring AI Demo — Google Gemini
+# Spring AI Demo with Google Gemini
 
-A **Spring Boot** application demonstrating **Spring AI integration with Google Gemini**.
-
----
-
-## -> High-Level Design
-
-### => Components & Responsibilities
-
-| Component        | Role                                                                                     |
-| ---------------- | ---------------------------------------------------------------------------------------- |
-| `HomeController` | Serves the Thymeleaf web UI at `GET /`                                                   |
-| `AIController`   | REST endpoint — accepts a prompt query param, returns AI-generated text                  |
-| `AIService`      | Wraps Spring AI `ChatClient`; sends the prompt to Google Gemini and returns the response |
-| `Gemini API`     | External LLM (`gemini-2.5-flash`) hosted on Google Cloud; performs text generation       |
+A simple Spring Boot application that integrates Spring AI with Google Gemini to generate AI-powered responses.
 
 ---
 
-## -> UI Overview
+# Project Overview
 
-The application serves a clean single-page chat interface at:
+This project demonstrates:
 
-=> http://localhost:8080
-
----
-
-### -> Initial State
-
-```
-Spring AI Demo  [Gemini]
-
-Ask anything
-
-┌──────────────────────────────────────────────┐
-│ e.g. Explain Spring AI in simple terms...    │
-└──────────────────────────────────────────────┘
-
-[ Ask Gemini ]
-```
+- Spring Boot REST API
+- Spring AI integration
+- Google Gemini API usage
+- Thymeleaf frontend UI
+- Prompt-based AI text generation
 
 ---
 
-### -> While Waiting for Response
+# Architecture
 
-```
-[ Ask Gemini ] (disabled)
+```mermaid
+graph TD
 
-↻ Thinking...
+    subgraph Client["Browser"]
+        UI["index.html (Thymeleaf UI)"]
+    end
+
+    subgraph Backend["Spring Boot Application"]
+        HC["HomeController"]
+        AC["AIController"]
+        AS["AIService"]
+    end
+
+    subgraph Gemini["Google Gemini API"]
+        GM["gemini-2.5-flash"]
+    end
+
+    UI -->|GET /| HC
+    UI -->|Prompt Request| AC
+    AC -->|generateText(prompt)| AS
+    AS -->|Spring AI Request| GM
+    GM -->|AI Response| AS
+    AS --> AC
+    AC --> UI
 ```
 
 ---
 
-### -> Response State
+# Components
 
-```
-Spring AI is a framework within the Spring ecosystem
-that simplifies building AI-powered applications...
+| Component | Description |
+|---|---|
+| `HomeController` | Loads the homepage |
+| `AIController` | Handles API requests |
+| `AIService` | Connects to Gemini using Spring AI |
+| `Gemini API` | Generates AI responses |
+
+---
+
+# User Interface
+
+The application runs at:
+
+```text
+http://localhost:8080
 ```
 
 ---
 
-=> **Tip:**
-Press `Ctrl + Enter` (or `Cmd + Enter` on macOS) to submit without clicking the button.
+## Initial Screen
+
+```text
+ -------------------------------------------------------
+| Spring AI Demo - Gemini                               |
+|                                                       |
+| Ask anything                                          |
+| ---------------------------------------------------   |
+| Explain Spring AI in simple terms...                 |
+| ---------------------------------------------------   |
+|                                                       |
+| [ Ask Gemini ]                                        |
+ -------------------------------------------------------
+```
 
 ---
 
-## -> Step 1: Create a Gemini API Key
+## Loading State
 
-1. Go to **Google AI Studio**
-2. Sign in with your Google account
-3. Click **"Create API key"**
+```text
+ -------------------------------------------------------
+| Spring AI Demo - Gemini                               |
+|                                                       |
+| What is Spring AI?                                    |
+|                                                       |
+| [ Ask Gemini ] (disabled)                             |
+|                                                       |
+| Thinking...                                           |
+ -------------------------------------------------------
+```
+
+---
+
+## Response State
+
+```text
+ -------------------------------------------------------
+| Spring AI Demo - Gemini                               |
+|                                                       |
+| What is Spring AI?                                    |
+|                                                       |
+| Spring AI is a framework that simplifies integrating  |
+| AI models into Spring applications.                   |
+|                                                       |
+ -------------------------------------------------------
+```
+
+---
+
+# Step 1 — Create Gemini API Key
+
+1. Open Google AI Studio:
+   https://aistudio.google.com/app/apikey
+
+2. Login with your Google account
+
+3. Click **Create API Key**
+
 4. Copy the generated key
 
 ---
 
-## -> Step 2: Configure the API Key
+# Step 2 — Configure API Key
 
 Open:
 
-```
+```text
 src/main/resources/application.properties
 ```
 
@@ -86,140 +141,124 @@ Add:
 
 ```properties
 spring.application.name=spring-ai-demo
+
 spring.ai.google.genai.api-key=YOUR_GEMINI_API_KEY
+
 spring.ai.google.genai.chat.options.model=gemini-2.5-flash
 ```
 
-### -> Secure Way (Recommended)
+---
+
+# Recommended Secure Setup
+
+Instead of hardcoding the API key:
 
 ```properties
 spring.ai.google.genai.api-key=${GEMINI_API_KEY}
 ```
 
-Set environment variable:
+## Windows CMD
+
+```cmd
+set GEMINI_API_KEY=your_api_key
+```
+
+## PowerShell
+
+```powershell
+$env:GEMINI_API_KEY="your_api_key"
+```
+
+## Linux/macOS
 
 ```bash
-export GEMINI_API_KEY=your_key_here
+export GEMINI_API_KEY=your_api_key
 ```
 
 ---
 
-## -> Step 3: Run the Application
+# Step 3 — Run the Project
 
 ```bash
 mvn clean install
 mvn spring-boot:run
 ```
 
-App will start at:
+Application starts at:
 
-=> http://localhost:8080
+```text
+http://localhost:8080
+```
 
 ---
 
-## -> Step 4: Test the API
+# Step 4 — Test the API
 
-### Using CURL
+## Browser Test
 
-```bash
-curl "http://localhost:8080/api/ai/ask?prompt=What+is+Spring+AI?"
-```
-
-### Using Browser
-
-```
+```text
 http://localhost:8080/api/ai/ask?prompt=Hello
 ```
 
 ---
 
-## * Tech Stack
+## cURL Test
 
-* Java
-* Spring Boot
-* Spring AI
-* Google Gemini API
-* Thymeleaf
-
-----
-
-## -> License
-
-This project is for learning/demo purposes.
-
-
-
-***** Application Flow **********
-
-###  Client Layer (Browser)
-
-* User opens the application in the browser
-* UI: `index.html` (Thymeleaf)
+```bash
+curl "http://localhost:8080/api/ai/ask?prompt=What+is+Spring+AI?"
+```
 
 ---
 
-###  Step-by-Step Flow
+# Request Flow
 
-1. **User Request (Home Page)**
-
-   * Browser → `GET /`
-   * Handled by: `HomeController`
-
-3. **Load UI**
-
-   * `HomeController` returns Thymeleaf template
-   * Browser displays `index.html`
-
-4. **User Sends Prompt**
-
-   * User enters a question and clicks **Ask Gemini**
-   * Browser → `GET /api/ai/ask?prompt=...`
-
-5. **REST Controller**
-
-   * Request handled by: `AIController`
-   * Calls service method: `generateText(prompt)`
-
-6. **Service Layer**
-
-   * `AIService` uses Spring AI `ChatClient`
-   * Sends request to Gemini API
-
-7. **External API Call**
-
-   * `AIService` → HTTP call → Google Gemini (`gemini-2.5-flash`)
-
-8. **AI Processing**
-
-   * Gemini API processes the prompt
-   * Generates response
-
-9. **Response Flow Back**
-
-   * Gemini → `AIService` (AI response)
-   * `AIService` → `AIController` (String response)
-   * `AIController` → Browser (JSON/text response)
-
-10. **UI Update**
-
-   * Browser displays AI-generated response
+```text
+User enters prompt
+        ↓
+Frontend sends request
+        ↓
+AIController receives request
+        ↓
+AIService calls Gemini API
+        ↓
+Gemini generates response
+        ↓
+Response displayed on UI
+```
 
 ---
 
-## => Summary Flow
+# Technologies Used
 
-```
-Browser (UI)
-   ↓
-HomeController
-   ↓
-Thymeleaf UI Loaded
-   ↓
-User Prompt → AIController
-   ↓
-AIService (ChatClient)
-   ↓
-Google Gemini API
-   ↓
-Response back → UI
-```
+| Technology | Purpose |
+|---|---|
+| Java | Backend Language |
+| Spring Boot | Application Framework |
+| Spring AI | AI Integration |
+| Thymeleaf | Frontend UI |
+| Maven | Build Tool |
+| Google Gemini | AI Model |
+
+---
+
+# Keyboard Shortcut
+
+- `Ctrl + Enter` → Submit prompt (Windows/Linux)
+- `Cmd + Enter` → Submit prompt (macOS)
+
+---
+
+# Future Improvements
+
+- Chat history
+- Streaming responses
+- Markdown rendering
+- Multiple AI model support
+- Authentication
+- Docker deployment
+
+---
+
+# Author
+
+Developed using Spring Boot and Spring AI with Google Gemini integration.
